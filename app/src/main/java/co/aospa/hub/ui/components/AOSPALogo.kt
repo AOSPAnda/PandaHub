@@ -1,4 +1,4 @@
-package co.aospa.hub
+package co.aospa.hub.ui.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size

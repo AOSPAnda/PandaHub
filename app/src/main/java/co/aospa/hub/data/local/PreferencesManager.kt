@@ -1,10 +1,9 @@
-package co.aospa.hub.data
+package co.aospa.hub.data.local
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import java.util.Date
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -20,9 +19,9 @@ class PreferencesManager(private val context: Context) {
             preferences[LAST_SUCCESSFUL_CHECK_KEY]
         }
 
-    suspend fun saveLastSuccessfulCheck(date: Date) {
+    suspend fun saveLastSuccessfulCheck(date: Long) {
         context.dataStore.edit { preferences ->
-            preferences[LAST_SUCCESSFUL_CHECK_KEY] = date.time
+            preferences[LAST_SUCCESSFUL_CHECK_KEY] = date
         }
     }
 }
