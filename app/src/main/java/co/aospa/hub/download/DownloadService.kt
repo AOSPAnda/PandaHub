@@ -2,15 +2,16 @@ package co.aospa.hub.download
 
 import android.app.Service
 import android.content.Intent
+import android.os.Environment
 import android.os.IBinder
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentLength
-import io.ktor.utils.io.readAvailable
+import io.ktor.http.isSuccess
 import java.io.File
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +22,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 
 class DownloadService : Service() {
@@ -56,49 +58,52 @@ class DownloadService : Service() {
         if (downloadJob?.isActive == true) return
 
         currentDownloadId = downloadId
-        currentFile = File(getExternalFilesDir(null), fileName)
-        val downloadedBytes = if (currentFile!!.exists()) currentFile!!.length() else 0
+        currentFile = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
+        val downloadedBytes = currentFile?.length() ?: 0
 
         downloadJob = serviceScope.launch {
             try {
                 updateDownloadStatus(DownloadStatus.Preparing)
 
-                client.prepareGet(url) {
+                val response = client.get(url) {
                     if (downloadedBytes > 0) {
                         header(HttpHeaders.Range, "bytes=$downloadedBytes-")
                     }
-                }.execute { response ->
-                    val channel = response.bodyAsChannel()
-                    val contentLength = response.contentLength()?.toFloat() ?: 0f
+                }
 
-                    currentFile!!.outputStream().buffered().use { output ->
+                if (!response.status.isSuccess()) throw Exception("Unexpected code ${response.status}")
+
+                val channel = response.bodyAsChannel()
+                val contentLength = response.contentLength()?.toLong() ?: -1L
+
+                withContext(Dispatchers.IO) {
+                    currentFile?.outputStream()?.use { outputStream ->
                         var totalBytes = downloadedBytes
                         val buffer = ByteArray(BUFFER_SIZE)
-                        var lastUpdateTime = System.currentTimeMillis()
-                        var lastReportedProgress = -1
+                        var bytesRead: Int
 
-                        while (!channel.isClosedForRead) {
-                            val bytesRead = channel.readAvailable(buffer)
-                            if (bytesRead < 0) break
-
-                            output.write(buffer, 0, bytesRead)
+                        while (channel.readAvailable(buffer, 0, buffer.size)
+                                .also { bytesRead = it } != -1
+                        ) {
+                            outputStream.write(buffer, 0, bytesRead)
                             totalBytes += bytesRead
 
-                            val currentTime = System.currentTimeMillis()
-                            val progress = ((totalBytes / contentLength) * 100).roundToInt()
-
-                            if (currentTime - lastUpdateTime >= UPDATE_INTERVAL || progress != lastReportedProgress) {
-                                updateDownloadStatus(DownloadStatus.Downloading(progress))
-                                lastUpdateTime = currentTime
-                                lastReportedProgress = progress
+                            val progress = if (contentLength > 0) {
+                                ((totalBytes.toFloat() / contentLength) * 100).roundToInt()
+                            } else {
+                                -1 // indeterminate progress
                             }
+                            updateDownloadStatus(DownloadStatus.Downloading(progress))
 
                             yield() // Cooperate with cancellation
                         }
                     }
                 }
 
-                updateDownloadStatus(DownloadStatus.Completed(currentFile!!))
+                currentFile?.let { file ->
+                    updateDownloadStatus(DownloadStatus.Completed(file))
+                }
+
                 stopSelf()
             } catch (e: Exception) {
                 updateDownloadStatus(DownloadStatus.Failed(e.message ?: "Unknown error occurred"))
@@ -153,8 +158,7 @@ class DownloadService : Service() {
     }
 
     companion object {
-        private const val BUFFER_SIZE = 8192 * 4  // 32 KB buffer
-        private const val UPDATE_INTERVAL = 500L // 0.5 second
+        private const val BUFFER_SIZE = 8192  // 8 KB buffer
 
         private val _downloadStatus = MutableStateFlow<DownloadStatus>(DownloadStatus.Idle)
         val downloadStatus: StateFlow<DownloadStatus> = _downloadStatus
