@@ -15,8 +15,9 @@
 android_app {
     name: "ParanoidHub",
     sdk_version: "system_current",
-    system_ext_specific: true,
     privileged: true,
+    certificate: "platform",
+    system_ext_specific: true,
 
     srcs: ["src/**/*.java"],
 

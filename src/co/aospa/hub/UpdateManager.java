@@ -207,7 +207,7 @@ public class UpdateManager {
     public synchronized void suspend() throws UpdaterState.InvalidTransitionException {
         Log.d(TAG, "suspend invoked");
         setUpdaterState(UpdaterState.PAUSED);
-        mUpdateEngine.suspend();
+        mUpdateEngine.cancel();
     }
 
     /**
@@ -216,17 +216,7 @@ public class UpdateManager {
     public synchronized void resume() throws UpdaterState.InvalidTransitionException {
         Log.d(TAG, "resume invoked");
         setUpdaterState(UpdaterState.RUNNING);
-        mUpdateEngine.resume();
-    }
-
-    public synchronized void setUpdaterStateRunning() throws UpdaterState.InvalidTransitionException {
-        Log.d(TAG, "set state running");
-        setUpdaterState(UpdaterState.RUNNING);
-    }
-
-    public synchronized void setUpdaterStateIdle() throws UpdaterState.InvalidTransitionException {
-        Log.d(TAG, "set state idle");
-        setUpdaterState(UpdaterState.IDLE);
+        updateEngineReApplyPayload();
     }
 
     /**
