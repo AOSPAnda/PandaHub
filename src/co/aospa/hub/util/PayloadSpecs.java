@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.example.android.systemupdatersample.util;
+package co.aospa.hub.util;
 
-import com.example.android.systemupdatersample.PayloadSpec;
+import co.aospa.hub.PayloadSpec;
 
 import java.io.BufferedReader;
 import java.io.File;

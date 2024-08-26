@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.example.android.systemupdatersample.services;
+package co.aospa.hub.services;
 
-import static com.example.android.systemupdatersample.util.PackageFiles.COMPATIBILITY_ZIP_FILE_NAME;
-import static com.example.android.systemupdatersample.util.PackageFiles.OTA_PACKAGE_DIR;
-import static com.example.android.systemupdatersample.util.PackageFiles.PAYLOAD_BINARY_FILE_NAME;
-import static com.example.android.systemupdatersample.util.PackageFiles.PAYLOAD_PROPERTIES_FILE_NAME;
+import static co.aospa.hub.util.PackageFiles.COMPATIBILITY_ZIP_FILE_NAME;
+import static co.aospa.hub.util.PackageFiles.OTA_PACKAGE_DIR;
+import static co.aospa.hub.util.PackageFiles.PAYLOAD_BINARY_FILE_NAME;
+import static co.aospa.hub.util.PackageFiles.PAYLOAD_PROPERTIES_FILE_NAME;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -31,12 +31,12 @@ import android.os.ResultReceiver;
 import android.os.UpdateEngine;
 import android.util.Log;
 
-import com.example.android.systemupdatersample.PayloadSpec;
-import com.example.android.systemupdatersample.UpdateConfig;
-import com.example.android.systemupdatersample.util.FileDownloader;
-import com.example.android.systemupdatersample.util.PackageFiles;
-import com.example.android.systemupdatersample.util.PayloadSpecs;
-import com.example.android.systemupdatersample.util.UpdateConfigs;
+import co.aospa.hub.PayloadSpec;
+import co.aospa.hub.UpdateConfig;
+import co.aospa.hub.util.FileDownloader;
+import co.aospa.hub.util.PackageFiles;
+import co.aospa.hub.util.PayloadSpecs;
+import co.aospa.hub.util.UpdateConfigs;
 import com.google.common.collect.ImmutableSet;
 
 import java.io.File;

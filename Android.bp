@@ -33,14 +33,22 @@ android_app {
     resource_dirs: ["res"],
 
     required: [
-        "privapp_whitelist_com.example.android.systemupdatersample"
+        "privapp_allowlist_co.aospa.hub",
+        "init.aospa-hub.rc"
     ],
 }
 
 prebuilt_etc {
-    name: "privapp_whitelist_com.example.android.systemupdatersample",
-    src: "privapp_whitelist_com.example.android.systemupdatersample.xml",
+    name: "privapp_allowlist_co.aospa.hub",
     system_ext_specific: true,
     sub_dir: "permissions",
+    src: "privapp_allowlist_co.aospa.hub.xml",
     filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "init.aospa-hub.rc",
+    system_ext_specific: true,
+    sub_dir: "init",
+    src: "init.aospa-hub.rc",
 }

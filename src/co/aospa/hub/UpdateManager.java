@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.systemupdatersample;
+package co.aospa.hub;
 
 import android.content.Context;
 import android.os.Handler;
@@ -22,9 +22,9 @@ import android.os.UpdateEngine;
 import android.os.UpdateEngineCallback;
 import android.util.Log;
 
-import com.example.android.systemupdatersample.services.PrepareUpdateService;
-import com.example.android.systemupdatersample.util.UpdateEngineErrorCodes;
-import com.example.android.systemupdatersample.util.UpdateEngineProperties;
+import co.aospa.hub.services.PrepareUpdateService;
+import co.aospa.hub.util.UpdateEngineErrorCodes;
+import co.aospa.hub.util.UpdateEngineProperties;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.AtomicDouble;

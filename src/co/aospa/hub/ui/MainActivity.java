@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.systemupdatersample.ui;
+package co.aospa.hub.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -41,13 +41,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.systemupdatersample.R;
-import com.example.android.systemupdatersample.UpdateManager;
-import com.example.android.systemupdatersample.UpdaterState;
-import com.example.android.systemupdatersample.util.PackageFiles;
-import com.example.android.systemupdatersample.util.UpdateConfigs;
-import com.example.android.systemupdatersample.util.UpdateEngineErrorCodes;
-import com.example.android.systemupdatersample.util.UpdateEngineStatuses;
+import co.aospa.hub.R;
+import co.aospa.hub.UpdateManager;
+import co.aospa.hub.UpdaterState;
+import co.aospa.hub.util.PackageFiles;
+import co.aospa.hub.util.UpdateConfigs;
+import co.aospa.hub.util.UpdateEngineErrorCodes;
+import co.aospa.hub.util.UpdateEngineStatuses;
 
 import java.io.BufferedReader;
 import java.io.File;
