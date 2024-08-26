@@ -516,14 +516,26 @@ public class MainActivity extends Activity {
     }
 
     private void directlyApplyUpdate() {
-        UpdateEngine updateEngine = new UpdateEngine();
         String selectedPath = mTextViewSelectPath.getText().toString();
-        ArrayList<String> headerKeyValuePairs = new ArrayList<>();
-        HashMap<String, String> metadata = new HashMap<>();
-
         Log.i(TAG, "directlyApplyUpdate select path= " + selectedPath);
 
-        try (ZipFile zipFile = new ZipFile(Paths.get(selectedPath).toFile())) {
+        if (selectedPath.isEmpty()) {
+            Log.e(TAG, "No update file selected");
+            return;
+        }
+
+        File updateFile = new File(selectedPath);
+        if (!updateFile.exists() || !updateFile.canRead()) {
+            Log.e(TAG, "Update file does not exist or is not readable");
+            return;
+        }
+
+        try {
+            UpdateEngine updateEngine = new UpdateEngine();
+            ArrayList<String> headerKeyValuePairs = new ArrayList<>();
+            HashMap<String, String> metadata = new HashMap<>();
+
+            ZipFile zipFile = new ZipFile(updateFile);
             long payloadOffset = 0;
             long payloadSize = 0;
             long totalZipSize = 0;
@@ -539,7 +551,7 @@ public class MainActivity extends Activity {
                     long compressedSize = entry.getCompressedSize();
                     if (PackageFiles.PAYLOAD_BINARY_FILE_NAME.equals(entryName)) {
                         if (entry.getMethod() != ZipEntry.STORED) {
-                            throw new IOException("Invalid compression method.");
+                            throw new IOException("Invalid compression method for payload.");
                         }
                         payloadSize = compressedSize;
                     } else if (PackageFiles.PAYLOAD_PROPERTIES_FILE_NAME.equals(entryName)) {
@@ -555,8 +567,8 @@ public class MainActivity extends Activity {
                              BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
                             String line;
                             while ((line = reader.readLine()) != null) {
-                                String[] parts = line.split("=");
-                                if (parts.length > 1) {
+                                String[] parts = line.split("=", 2);
+                                if (parts.length == 2) {
                                     metadata.put(parts[0], parts[1]);
                                 }
                             }
@@ -568,36 +580,25 @@ public class MainActivity extends Activity {
 
             payloadOffset = totalZipSize - payloadSize;
 
-            int verificationResult = verifyMetaDataFile(metadata);
-            Log.i(TAG, "meta verify state= " + verificationResult);
-
-            if (!selectedPath.isEmpty() && verificationResult == 0) {
-                setOtaFilePathBySharePreference(selectedPath);
-                mUpdateManager.setUpdaterStateRunning();
-                acquireWakeLock();
-                updateEngine.applyPayload(selectedPath, payloadOffset, payloadSize,
-                        headerKeyValuePairs.toArray(new String[0]));
-                mButtonApply.setEnabled(false);
-            } else {
-                uiStateError();
-                Log.e(TAG, "Failed to verify metadata config error code=" + verificationResult);
+            if (payloadSize == 0) {
+                throw new IOException("Payload not found in the update package.");
             }
+
+            setOtaFilePathBySharePreference(selectedPath);
+            mUpdateManager.setUpdaterStateRunning();
+            acquireWakeLock();
+
+            updateEngine.applyPayload(selectedPath, payloadOffset, payloadSize,
+                    headerKeyValuePairs.toArray(new String[0]));
+
+            mButtonApply.setEnabled(false);
+            zipFile.close();
+
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to process update file", e);
         } catch (Exception e) {
             Log.e(TAG, "Failed to apply update", e);
             uiStateError();
         }
-    }
-
-    private int verifyMetaDataFile(HashMap<String, String> metadata) {
-        String deviceProp = SystemProperties.get("ro.product.device", "");
-        Log.i(TAG, "verifyMetaDataFile productProp=" + deviceProp);
-
-        if (!metadata.getOrDefault("pre-device", " ").equals(deviceProp)) {
-            mTextViewVerifyStatus.setText("pre-device is different from ro.product.device");
-            return -1;
-        }
-
-        mTextViewVerifyStatus.setText("Verify metadata file success");
-        return 0;
     }
 }
