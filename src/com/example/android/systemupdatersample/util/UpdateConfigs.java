@@ -17,6 +17,7 @@
 package com.example.android.systemupdatersample.util;
 
 import android.content.Context;
+import android.os.Environment;
 import android.util.Log;
 
 import com.example.android.systemupdatersample.UpdateConfig;
@@ -94,6 +95,20 @@ public final class UpdateConfigs {
                 .stream(config.getAbConfig().getPropertyFiles())
                 .filter(file -> filename.equals(file.getFilename()))
                 .findFirst();
+    }
+
+    public static String[] getSdcardFilePath() {
+        File[] listFiles = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/ota").listFiles();
+        ArrayList arrayList = new ArrayList();
+        if (listFiles != null) {
+            for (File file : listFiles) {
+                Log.d("File Path", file.getAbsolutePath());
+                if (!file.getAbsolutePath().isEmpty()) {
+                    arrayList.add(file.getAbsolutePath());
+                }
+            }
+        }
+        return (String[]) arrayList.toArray(new String[arrayList.size()]);
     }
 
     private UpdateConfigs() {}

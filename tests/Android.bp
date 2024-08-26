@@ -12,23 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package {
-    // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "bootable_recovery_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
-    default_applicable_licenses: ["bootable_recovery_license"],
-}
-
 android_test {
-    name: "SystemUpdaterSampleTests",
+    name: "ParanoidHubTests",
     sdk_version: "system_current",
 
     libs: [
         "android.test.base.stubs",
         "android.test.runner.stubs",
-        "SystemUpdaterSample",
+        "ParanoidHub",
     ],
 
     static_libs: [
@@ -38,7 +29,7 @@ android_test {
         "guava",
     ],
 
-    instrumentation_for: "SystemUpdaterSample",
+    instrumentation_for: "ParanoidHub",
 
     optimize: {
         enabled: false,

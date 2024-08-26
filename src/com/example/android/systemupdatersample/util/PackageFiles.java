@@ -48,6 +48,7 @@ public final class PackageFiles {
     public static final String CARE_MAP_FILE_NAME = "care_map.txt";
 
     public static final String METADATA_FILE_NAME = "metadata";
+    public static final String METADATA_FILE_PATH = "META-INF/com/android/metadata";
 
     /**
      * The zip file that claims the compatibility of the update package to check against the Android

@@ -51,59 +51,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp" />
 
-            <TextView
-                android:id="@+id/textView4"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Apply an update" />
-
-            <TextView
-                android:id="@+id/textViewConfigsDirHint"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Config files located in NULL"
-                android:textColor="#777"
-                android:textSize="10sp"
-                android:textStyle="italic" />
-
-            <Spinner
-                android:id="@+id/spinnerConfigs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/buttonReload"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="onReloadClick"
-                    android:text="Reload" />
-
-                <Button
-                    android:id="@+id/buttonViewConfig"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="onViewConfigClick"
-                    android:text="View config" />
-
-                <Button
-                    android:id="@+id/buttonApplyConfig"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:onClick="onApplyConfigClick"
-                    android:text="Apply" />
-            </LinearLayout>
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -197,6 +144,62 @@
                     android:text="Reset" />
             </LinearLayout>
 
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="40dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select OTA file from /sdcard/ota:" />
+
+            <Spinner
+                android:id="@+id/spinnerPaths"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Load OTA file:" />
+
+            <TextView
+                android:id="@+id/textViewSelectPath"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Verify metadata file status:" />
+
+            <TextView
+                android:id="@+id/textViewVerifyStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <Button
+                android:id="@+id/buttonApply"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onDirectApplyOTAClick"
+                android:text="Apply OTA" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -204,38 +207,21 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/buttonSuspend"
+                    android:id="@+id/buttonSdcardReload"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:onClick="onSuspendClick"
-                    android:text="Suspend" />
+                    android:onClick="onSdcardFileReloadClick"
+                    android:text="Reload" />
 
                 <Button
-                    android:id="@+id/buttonResume"
+                    android:id="@+id/buttonBrowse"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:onClick="onResumeClick"
-                    android:text="Resume" />
+                    android:onClick="onBrowseClick"
+                    android:text="Browse" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/textViewUpdateInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:textColor="#777"
-                android:textSize="10sp"
-                android:textStyle="italic"
-                android:text="@string/finish_update_info" />
-
-            <Button
-                android:id="@+id/buttonSwitchSlot"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:onClick="onSwitchSlotClick"
-                android:text="@string/switch_slot" />
 
         </LinearLayout>
 
