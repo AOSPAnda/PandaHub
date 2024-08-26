@@ -37,7 +37,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,11 +72,7 @@ public class MainActivity extends Activity {
 
     private static final String TAG = "MainActivity";
 
-    private static final int PICK_FILE_REQUEST = 15;
-    public static final String SDCARD_DATA_PATH = "/data/media/0/ota/";
-
     private TextView mTextViewBuild;
-    private Spinner mSpinnerPaths;
     private TextView mTextViewSelectPath;
     private Button mButtonApply;
     private Button mButtonStop;
@@ -102,7 +97,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         this.mTextViewBuild = findViewById(R.id.textViewBuild);
-        this.mSpinnerPaths = findViewById(R.id.spinnerPaths);
         this.mTextViewSelectPath = findViewById(R.id.textViewSelectPath);
         this.mButtonApply = findViewById(R.id.buttonApply);
         this.mButtonStop = findViewById(R.id.buttonStop);
@@ -122,7 +116,6 @@ public class MainActivity extends Activity {
         this.mUpdateManager.setOnEngineCompleteCallback(this::onEnginePayloadApplicationComplete);
         this.mUpdateManager.setOnProgressUpdateCallback(this::onProgressUpdate);
 
-        loadSdcardFilePathsToSpinner();
         updateOtaStateBySharePreference();
 
         if (mUpdateManager.getUpdaterState() == UpdaterState.RUNNING) {
@@ -321,21 +314,10 @@ public class MainActivity extends Activity {
 
     /** resets ui */
     private void uiResetWidgets() {
-        mTextViewBuild.setText(getBuildNumber());
+        mTextViewBuild.setText(Build.DISPLAY);
         mButtonStop.setEnabled(false);
         mButtonReset.setEnabled(false);
         mButtonApply.setEnabled(true);
-    }
-
-    private String getBuildNumber() {
-        StringBuilder buildNumber = new StringBuilder(SystemProperties.get("ro.product.vendor.device", ""))
-                .append("-")
-                .append(Build.DISPLAY);
-        String sku = SystemProperties.get("ro.boot.hardware.sku", "");
-        if (!sku.equals("ROW")) {
-            buildNumber.append("-").append(sku);
-        }
-        return buildNumber.toString();
     }
 
     private void uiResetEngineText() {
@@ -413,27 +395,6 @@ public class MainActivity extends Activity {
     private void setUiUpdaterState(int state) {
         String stateText = UpdaterState.getStateText(state);
         mTextViewUpdaterState.setText(stateText + "/" + state);
-    }
-
-    private void loadSdcardFilePathsToSpinner() {
-        String[] spinnerArray = getHubUpdatesFilePaths();
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item,
-                spinnerArray);
-        spinnerArrayAdapter.setDropDownViewResource(android.R.layout
-                .simple_spinner_dropdown_item);
-        mSpinnerPaths.setAdapter(spinnerArrayAdapter);
-        mSpinnerPaths.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mTextViewVerifyStatus.setText("");
-                mTextViewSelectPath.setText((String) mSpinnerPaths.getItemAtPosition(position));
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
     }
 
     private void createDialogToReboot() {
@@ -527,73 +488,42 @@ public class MainActivity extends Activity {
                 .setNegativeButton(android.R.string.cancel, null).show();
     }
 
-    public void onSdcardFileReloadClick(View view) {
-        loadSdcardFilePathsToSpinner();
-        if (!isSdcardPathContainFiles()) {
-            mTextViewSelectPath.setText("");
-        }
-    }
-
-    private boolean isSdcardPathContainFiles() {
-        File directory = new File("/data/hub_updates/");
-        File[] files = directory.listFiles();
-
-        boolean containsFiles = files != null && files.length > 0;
-
-        Log.d(TAG, "Directory /data/hub_updates/ contains files: " + containsFiles);
-        if (!containsFiles) {
+    public void onFileReloadClick(View view) {
+        ArrayList<String> filePaths = getHubUpdatesFilePaths();
+        if (!filePaths.isEmpty()) {
+            mTextViewVerifyStatus.setText("");
+            mTextViewSelectPath.setText(filePaths.get(filePaths.size() - 1));
+        } else {
             Toast.makeText(this, "No files found in /data/hub_updates/", Toast.LENGTH_SHORT).show();
         }
-        return containsFiles;
     }
 
-    public static String[] getHubUpdatesFilePaths() {
+    public static ArrayList<String> getHubUpdatesFilePaths() {
         File directory = new File("/data/hub_updates/");
         File[] listFiles = directory.listFiles();
-        List<String> filePaths = new ArrayList<>();
+        ArrayList<String> filePaths = new ArrayList<>();
 
-        if (listFiles != null) {
+        if (listFiles != null && listFiles.length > 0) {
             for (File file : listFiles) {
-                String filePath = file.getAbsolutePath();
-                Log.d(TAG, "File Path: " + filePath);
-                if (!filePath.isEmpty()) {
-                    filePaths.add(filePath);
-                }
+                filePaths.add(file.getAbsolutePath());
             }
+            Log.d(TAG, "Found " + filePaths.size() + " files in /data/hub_updates/");
         } else {
             Log.d(TAG, "No files found in /data/hub_updates/ or directory doesn't exist");
         }
 
-        return filePaths.toArray(new String[0]);
-    }
-
-    private void copyFile(File sourceFile, File destFile) throws IOException {
-        if (!destFile.getParentFile().exists()) {
-            destFile.getParentFile().mkdirs();
-        }
-        if (!destFile.exists()) {
-            destFile.createNewFile();
-        }
-        new CopyFileTask(sourceFile, destFile).execute();
-    }
-
-    public void onBrowseClick(View view) {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setDataAndType(Uri.parse(Environment.getExternalStorageDirectory().getPath() + "/Documents"), "*/*");
-        startActivityForResult(intent, PICK_FILE_REQUEST);
+        return filePaths;
     }
 
     private void directlyApplyUpdate() {
         UpdateEngine updateEngine = new UpdateEngine();
-        CharSequence selectedPath = mTextViewSelectPath.getText();
+        String selectedPath = mTextViewSelectPath.getText().toString();
         ArrayList<String> headerKeyValuePairs = new ArrayList<>();
         HashMap<String, String> metadata = new HashMap<>();
 
         Log.i(TAG, "directlyApplyUpdate select path= " + selectedPath);
-        String[] pathParts = mTextViewSelectPath.getText().toString().split("/");
-        String filename = pathParts[pathParts.length - 1];
 
-        try (ZipFile zipFile = new ZipFile(Paths.get(selectedPath.toString()).toFile())) {
+        try (ZipFile zipFile = new ZipFile(Paths.get(selectedPath).toFile())) {
             long payloadOffset = 0;
             long payloadSize = 0;
             long totalZipSize = 0;
@@ -641,11 +571,11 @@ public class MainActivity extends Activity {
             int verificationResult = verifyMetaDataFile(metadata);
             Log.i(TAG, "meta verify state= " + verificationResult);
 
-            if (isSdcardPathContainFiles() && !filename.isEmpty() && verificationResult == 0) {
-                setOtaFilePathBySharePreference(selectedPath.toString());
+            if (!selectedPath.isEmpty() && verificationResult == 0) {
+                setOtaFilePathBySharePreference(selectedPath);
                 mUpdateManager.setUpdaterStateRunning();
                 acquireWakeLock();
-                updateEngine.applyPayload("file:///data/media/0/ota/" + filename, payloadOffset, payloadSize,
+                updateEngine.applyPayload(selectedPath, payloadOffset, payloadSize,
                         headerKeyValuePairs.toArray(new String[0]));
                 mButtonApply.setEnabled(false);
             } else {
@@ -669,71 +599,5 @@ public class MainActivity extends Activity {
 
         mTextViewVerifyStatus.setText("Verify metadata file success");
         return 0;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_FILE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            String[] pathSegments = DocumentsContract.getDocumentId(data.getData()).split(":");
-            String path = "primary".equalsIgnoreCase(pathSegments[0]) ?
-                    Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + pathSegments[1] : "";
-
-            if (!path.startsWith(Environment.getExternalStorageDirectory().getPath() + "/ota") && !path.isEmpty()) {
-                String destPath = Environment.getExternalStorageDirectory().getPath() + "/ota/" + new File(path).getName();
-                try {
-                    copyFile(new File(path), new File(destPath));
-                    mTextViewSelectPath.setText(destPath);
-                } catch (IOException e) {
-                    Log.e(TAG, "copy file fail", e);
-                }
-            } else {
-                mTextViewSelectPath.setText(path);
-            }
-            mTextViewVerifyStatus.setText("");
-        }
-    }
-
-    private class CopyFileTask extends AsyncTask<Void, Void, Void> {
-        private static final int BUFFER_SIZE = 8192;
-        private File mSourceFile;
-        private File mDestFile;
-
-        public CopyFileTask(File sourceFile, File destFile) {
-            this.mSourceFile = sourceFile;
-            this.mDestFile = destFile;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            isBackFromBrowseCopyFile = true;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            try (FileInputStream fis = new FileInputStream(mSourceFile);
-                 FileOutputStream fos = new FileOutputStream(mDestFile);
-                 FileChannel sourceChannel = fis.getChannel();
-                 FileChannel destChannel = fos.getChannel()) {
-
-                long size = sourceChannel.size();
-                long transferred = 0;
-                while (transferred < size) {
-                    transferred += destChannel.transferFrom(sourceChannel, transferred, size - transferred);
-                }
-            } catch (IOException e) {
-                Log.e(TAG, "Error copying file", e);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            mButtonApply.setEnabled(true);
-            Toast.makeText(getApplicationContext(), "File copied to /sdcard/ota successfully", Toast.LENGTH_SHORT).show();
-            isBackFromBrowseCopyFile = false;
-        }
     }
 }

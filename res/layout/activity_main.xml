@@ -151,21 +151,6 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Select OTA file from /sdcard/ota:" />
-
-            <Spinner
-                android:id="@+id/spinnerPaths"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="10dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:text="Load OTA file:" />
 
             <TextView
@@ -193,13 +178,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="10dp" />
 
-            <Button
-                android:id="@+id/buttonApply"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="onDirectApplyOTAClick"
-                android:text="Apply OTA" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -211,16 +189,16 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:onClick="onSdcardFileReloadClick"
+                    android:onClick="onFileReloadClick"
                     android:text="Reload" />
 
                 <Button
-                    android:id="@+id/buttonBrowse"
+                    android:id="@+id/buttonApply"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:onClick="onBrowseClick"
-                    android:text="Browse" />
+                    android:onClick="onDirectApplyOTAClick"
+                    android:text="Apply OTA" />
             </LinearLayout>
 
         </LinearLayout>
