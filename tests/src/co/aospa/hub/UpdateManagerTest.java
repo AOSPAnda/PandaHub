@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.systemupdatersample;
+package co.aospa.hub;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,8 +36,8 @@ import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.example.android.systemupdatersample.services.PrepareUpdateService;
-import com.example.android.systemupdatersample.tests.R;
+import co.aospa.hub.services.PrepareUpdateService;
+import co.aospa.hub.tests.R;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharStreams;
 

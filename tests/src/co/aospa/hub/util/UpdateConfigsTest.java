@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.example.android.systemupdatersample.util;
+package co.aospa.hub.util;
 
 import static org.junit.Assert.assertArrayEquals;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.example.android.systemupdatersample.UpdateConfig;
+import co.aospa.hub.UpdateConfig;
 
 import org.junit.Rule;
 import org.junit.Test;

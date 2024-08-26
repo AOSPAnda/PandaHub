@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.systemupdatersample;
+package co.aospa.hub;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -26,7 +26,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.example.android.systemupdatersample.tests.R;
+import co.aospa.hub.tests.R;
 import com.google.common.io.CharStreams;
 
 import org.junit.Before;

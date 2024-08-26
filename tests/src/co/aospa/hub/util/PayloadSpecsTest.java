@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.example.android.systemupdatersample.util;
+package co.aospa.hub.util;
 
-import static com.example.android.systemupdatersample.util.PackageFiles.PAYLOAD_BINARY_FILE_NAME;
+import static co.aospa.hub.util.PackageFiles.PAYLOAD_BINARY_FILE_NAME;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -27,8 +27,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.example.android.systemupdatersample.PayloadSpec;
-import com.example.android.systemupdatersample.tests.R;
+import co.aospa.hub.PayloadSpec;
+import co.aospa.hub.tests.R;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
