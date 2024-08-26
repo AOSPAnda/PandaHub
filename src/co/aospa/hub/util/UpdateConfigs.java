@@ -97,19 +97,5 @@ public final class UpdateConfigs {
                 .findFirst();
     }
 
-    public static String[] getSdcardFilePath() {
-        File[] listFiles = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/ota").listFiles();
-        ArrayList arrayList = new ArrayList();
-        if (listFiles != null) {
-            for (File file : listFiles) {
-                Log.d("File Path", file.getAbsolutePath());
-                if (!file.getAbsolutePath().isEmpty()) {
-                    arrayList.add(file.getAbsolutePath());
-                }
-            }
-        }
-        return (String[]) arrayList.toArray(new String[arrayList.size()]);
-    }
-
     private UpdateConfigs() {}
 }

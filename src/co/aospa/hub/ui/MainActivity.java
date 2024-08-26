@@ -59,6 +59,7 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -415,7 +416,7 @@ public class MainActivity extends Activity {
     }
 
     private void loadSdcardFilePathsToSpinner() {
-        String[] spinnerArray = UpdateConfigs.getSdcardFilePath();
+        String[] spinnerArray = getHubUpdatesFilePaths();
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item,
                 spinnerArray);
@@ -534,14 +535,36 @@ public class MainActivity extends Activity {
     }
 
     private boolean isSdcardPathContainFiles() {
-        String path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/ota/";
-        File[] files = new File(path).listFiles();
+        File directory = new File("/data/hub_updates/");
+        File[] files = directory.listFiles();
+
         boolean containsFiles = files != null && files.length > 0;
-        Log.d(TAG, "isSdcardPathContainFiles path=" + path + ", contains=" + containsFiles);
+
+        Log.d(TAG, "Directory /data/hub_updates/ contains files: " + containsFiles);
         if (!containsFiles) {
-            Toast.makeText(this, "There is no file in the /sdcard/ota path.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No files found in /data/hub_updates/", Toast.LENGTH_SHORT).show();
         }
         return containsFiles;
+    }
+
+    public static String[] getHubUpdatesFilePaths() {
+        File directory = new File("/data/hub_updates/");
+        File[] listFiles = directory.listFiles();
+        List<String> filePaths = new ArrayList<>();
+
+        if (listFiles != null) {
+            for (File file : listFiles) {
+                String filePath = file.getAbsolutePath();
+                Log.d(TAG, "File Path: " + filePath);
+                if (!filePath.isEmpty()) {
+                    filePaths.add(filePath);
+                }
+            }
+        } else {
+            Log.d(TAG, "No files found in /data/hub_updates/ or directory doesn't exist");
+        }
+
+        return filePaths.toArray(new String[0]);
     }
 
     private void copyFile(File sourceFile, File destFile) throws IOException {
