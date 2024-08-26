@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.systemupdatersample.util;
+package co.aospa.hub.util;
 
 import android.os.UpdateEngine;
 import android.util.SparseArray;

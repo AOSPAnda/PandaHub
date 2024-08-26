@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.systemupdatersample;
+package co.aospa.hub;
 
 import android.os.Parcel;
 import android.os.Parcelable;
