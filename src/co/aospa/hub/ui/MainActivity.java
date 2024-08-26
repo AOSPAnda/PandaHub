@@ -16,7 +16,6 @@
 
 package co.aospa.hub.ui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.os.Build;
@@ -26,10 +25,19 @@ import android.os.UpdateEngine;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.google.android.material.snackbar.Snackbar;
 
 import co.aospa.hub.R;
 import co.aospa.hub.UpdateConfig;
@@ -44,27 +52,29 @@ import java.util.List;
 /**
  * UI for SystemUpdaterSample app.
  */
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
     private TextView mTextViewBuild;
-    private Spinner mSpinnerConfigs;
+    private AutoCompleteTextView mSpinnerConfigs;
     private TextView mTextViewConfigsDirHint;
-    private Button mButtonReload;
-    private Button mButtonApplyConfig;
-    private Button mButtonStop;
-    private Button mButtonReset;
-    private Button mButtonSuspend;
-    private Button mButtonResume;
-    private ProgressBar mProgressBar;
+    private MaterialButton mButtonReload;
+    private MaterialButton mButtonViewConfig;
+    private MaterialButton mButtonApplyConfig;
+    private MaterialButton mButtonStop;
+    private MaterialButton mButtonReset;
+    private MaterialButton mButtonSuspend;
+    private MaterialButton mButtonResume;
+    private LinearProgressIndicator mProgressBar;
     private TextView mTextViewUpdaterState;
     private TextView mTextViewEngineStatus;
     private TextView mTextViewEngineErrorCode;
     private TextView mTextViewUpdateInfo;
-    private Button mButtonSwitchSlot;
+    private MaterialButton mButtonSwitchSlot;
 
     private List<UpdateConfig> mConfigs;
+    private int mSelectedConfigPosition = -1;
 
     private final UpdateManager mUpdateManager =
             new UpdateManager(new UpdateEngine(), new Handler());
@@ -74,10 +84,14 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
+        setSupportActionBar(toolbar);
+
         this.mTextViewBuild = findViewById(R.id.textViewBuild);
         this.mSpinnerConfigs = findViewById(R.id.spinnerConfigs);
         this.mTextViewConfigsDirHint = findViewById(R.id.textViewConfigsDirHint);
         this.mButtonReload = findViewById(R.id.buttonReload);
+        this.mButtonViewConfig = findViewById(R.id.buttonViewConfig);
         this.mButtonApplyConfig = findViewById(R.id.buttonApplyConfig);
         this.mButtonStop = findViewById(R.id.buttonStop);
         this.mButtonReset = findViewById(R.id.buttonReset);
@@ -91,6 +105,18 @@ public class MainActivity extends Activity {
         this.mButtonSwitchSlot = findViewById(R.id.buttonSwitchSlot);
 
         this.mTextViewConfigsDirHint.setText(UpdateConfigs.getConfigsRoot(this));
+
+        mButtonReload.setOnClickListener(this::onReloadClick);
+        mButtonViewConfig.setOnClickListener(this::onViewConfigClick);
+        mButtonApplyConfig.setOnClickListener(this::onApplyConfigClick);
+        mButtonStop.setOnClickListener(this::onStopClick);
+        mButtonReset.setOnClickListener(this::onResetClick);
+        mButtonSuspend.setOnClickListener(this::onSuspendClick);
+        mButtonResume.setOnClickListener(this::onResumeClick);
+        mButtonSwitchSlot.setOnClickListener(this::onSwitchSlotClick);
+        mSpinnerConfigs.setOnItemClickListener((parent, view, position, id) -> {
+            mSelectedConfigPosition = position;
+        });
 
         uiResetWidgets();
         loadUpdateConfigs();
@@ -128,35 +154,45 @@ public class MainActivity extends Activity {
      */
     public void onReloadClick(View view) {
         loadUpdateConfigs();
+        showSnackbar("Configurations reloaded");
     }
 
     /**
      * view config button is clicked
      */
     public void onViewConfigClick(View view) {
-        UpdateConfig config = mConfigs.get(mSpinnerConfigs.getSelectedItemPosition());
-        new AlertDialog.Builder(this)
-                .setTitle(config.getName())
-                .setMessage(config.getRawJson())
-                .setPositiveButton(R.string.close, (dialog, id) -> dialog.dismiss())
-                .show();
+        UpdateConfig config = getSelectedConfig();
+        if (config != null) {
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle(config.getName())
+                    .setMessage(config.getRawJson())
+                    .setPositiveButton(R.string.close, (dialog, id) -> dialog.dismiss())
+                    .show();
+        } else {
+            showSnackbar("No configuration selected");
+        }
     }
 
     /**
      * apply config button is clicked
      */
     public void onApplyConfigClick(View view) {
-        new AlertDialog.Builder(this)
-                .setTitle("Apply Update")
-                .setMessage("Do you really want to apply this update?")
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
-                    uiResetWidgets();
-                    uiResetEngineText();
-                    applyUpdate(getSelectedConfig());
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+        UpdateConfig config = getSelectedConfig();
+        if (config != null) {
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle("Apply Update")
+                    .setMessage("Do you really want to apply this update?")
+                    .setIcon(R.drawable.ic_warning)
+                    .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
+                        uiResetWidgets();
+                        uiResetEngineText();
+                        applyUpdate(getSelectedConfig());
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+        } else {
+            showSnackbar("No configuration selected");
+        }
     }
 
     private void applyUpdate(UpdateConfig config) {
@@ -171,14 +207,15 @@ public class MainActivity extends Activity {
      * stop button clicked
      */
     public void onStopClick(View view) {
-        new AlertDialog.Builder(this)
+        new MaterialAlertDialogBuilder(this)
                 .setTitle("Stop Update")
                 .setMessage("Do you really want to cancel running update?")
-                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setIcon(R.drawable.ic_warning)
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
                     cancelRunningUpdate();
                 })
-                .setNegativeButton(android.R.string.cancel, null).show();
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void cancelRunningUpdate() {
@@ -193,15 +230,15 @@ public class MainActivity extends Activity {
      * reset button clicked
      */
     public void onResetClick(View view) {
-        new AlertDialog.Builder(this)
+        new MaterialAlertDialogBuilder(this)
                 .setTitle("Reset Update")
-                .setMessage("Do you really want to cancel running update"
-                        + " and restore old version?")
-                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setMessage("Do you really want to cancel running update and restore old version?")
+                .setIcon(R.drawable.ic_warning)
                 .setPositiveButton(android.R.string.ok, (dialog, whichButton) -> {
                     resetUpdate();
                 })
-                .setNegativeButton(android.R.string.cancel, null).show();
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void resetUpdate() {
@@ -378,6 +415,10 @@ public class MainActivity extends Activity {
         mButtonReset.setEnabled(true);
     }
 
+    private void showSnackbar(String message) {
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
+    }
+
     /**
      * loads json configurations from configs dir that is defined in {@link UpdateConfigs}.
      */
@@ -418,10 +459,18 @@ public class MainActivity extends Activity {
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout
                 .simple_spinner_dropdown_item);
         mSpinnerConfigs.setAdapter(spinnerArrayAdapter);
+
+        if (spinnerArray.length > 0) {
+            mSpinnerConfigs.setText(spinnerArray[0], false);
+            mSelectedConfigPosition = 0;
+        }
     }
 
     private UpdateConfig getSelectedConfig() {
-        return mConfigs.get(mSpinnerConfigs.getSelectedItemPosition());
+        if (mSelectedConfigPosition != -1 && mSelectedConfigPosition < mConfigs.size()) {
+            return mConfigs.get(mSelectedConfigPosition);
+        }
+        return null;
     }
 
 }

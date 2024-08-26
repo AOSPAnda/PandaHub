@@ -23,6 +23,9 @@ android_app {
 
     static_libs: [
         "guava",
+        "androidx.core_core",
+        "androidx.appcompat_appcompat",
+        "com.google.android.material_material",
     ],
 
     optimize: {
