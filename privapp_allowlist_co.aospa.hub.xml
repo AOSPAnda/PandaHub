@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<permissions>
+    <privapp-permissions package="co.aospa.hub">
+        <permission name="android.permission.MANAGE_DEVICE_POLICY_SYSTEM_UPDATES" />
+    </privapp-permissions>
+</permissions>
